@@ -1,4 +1,4 @@
-use bevy::prelude::{Camera2dBundle, Commands, default, OrthographicProjection};
+use bevy::prelude::*;
 use bevy::render::camera::WindowOrigin;
 
 pub fn camera_setup(mut commands: Commands) {
