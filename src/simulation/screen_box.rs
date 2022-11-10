@@ -29,7 +29,6 @@ impl SimulationBox {
         x = self.left + border_x + x * self.width() * (1. - self.border);
         y = self.bottom + border_y + y * self.height() * (1. - self.border);
 
-        debug!("{:?} -> {:?}", point, [x, y]);
         [x, y]
     }
 }
@@ -44,6 +43,5 @@ pub fn simulation_box_update(
         screen.right = window.width() - ui_space.right;
         screen.bottom = ui_space.bottom;
         screen.top = window.height() - ui_space.top;
-        debug!("{:?}", screen);
     }
 }
