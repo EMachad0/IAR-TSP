@@ -1,7 +1,7 @@
 use bevy::diagnostic::{Diagnostic, DiagnosticId, Diagnostics};
 use bevy::prelude::*;
 
-use crate::simulation::distance::DistanceTracker;
+use crate::simulation::info::distance::DistanceInfo;
 
 #[derive(Default)]
 pub struct DistanceDiagnosticsPlugin;
@@ -21,7 +21,7 @@ impl DistanceDiagnosticsPlugin {
         diagnostics.add(Diagnostic::new(Self::DISTANCE, "distance", 1));
     }
 
-    pub fn diagnostic(mut diagnostics: ResMut<Diagnostics>, tracker: Res<DistanceTracker>) {
+    pub fn diagnostic(mut diagnostics: ResMut<Diagnostics>, tracker: Res<DistanceInfo>) {
         diagnostics.add_measurement(Self::DISTANCE, || tracker.current as f64);
     }
 }

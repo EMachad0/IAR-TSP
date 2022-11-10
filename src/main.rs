@@ -4,6 +4,7 @@ mod dataset;
 mod diagnostics;
 mod game_state;
 mod simulation;
+mod timestep;
 mod ui;
 
 use bevy::prelude::*;
@@ -11,10 +12,10 @@ use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use iyes_loopless::prelude::*;
+use std::time::Duration;
 
+pub use crate::consts::*;
 pub use crate::game_state::GameState;
-
-use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 fn main() {
     let mut app = App::new();
@@ -28,19 +29,22 @@ fn main() {
             ..default()
         })
         .init_resource::<ui::OccupiedScreenSpace>()
-        .init_resource::<simulation::distance::DistanceTracker>()
-        .insert_resource(simulation::screen_box::SimulationBox {
-            border: 0.1,
-            ..default()
-        });
+        .init_resource::<simulation::info::distance::DistanceInfo>()
+        .init_resource::<simulation::info::update_count::UpdateCountInfo>()
+        .init_resource::<simulation::control::SimulationStatus>()
+        .insert_resource(ui::screen_box::SimulationBox::bordered(0.1));
 
     // Types
-    app.register_type::<simulation::city::City>();
+    app.register_type::<simulation::graph::city::City>();
 
     // Events
 
     // Stages
-    app.add_loopless_state(GameState::Loading);
+    app.add_loopless_state(GameState::Loading).add_stage_before(
+        CoreStage::Update,
+        timestep::FixedUpdateLabel,
+        timestep::FixedTimestepStage::new(Duration::from_secs_f64(STARTING_UPS)),
+    );
 
     // Plugins
     app.add_plugins(DefaultPlugins)
@@ -57,16 +61,16 @@ fn main() {
     // Exit Systems
 
     // Systems
-    app.add_system(ui::ui_setup);
+    app.add_system(ui::side_panel_setup);
     // Loading
     app.add_system_set_to_stage(
         CoreStage::PreUpdate,
         ConditionSet::new()
             .run_in_state(GameState::Loading)
             .run_if(dataset::on_dataset_load)
-            .with_system(simulation::path::path_setup_on_dataset_load)
-            .with_system(simulation::road::road_setup_on_dataset_load)
-            .with_system(simulation::city::city_setup_on_dataset_load)
+            .with_system(simulation::graph::path::path_setup_on_dataset_load)
+            .with_system(simulation::graph::road::road_setup_on_dataset_load)
+            .with_system(simulation::graph::city::city_setup_on_dataset_load)
             .into(),
     );
     app.add_system(game_state::transition_to_simulating.run_if(dataset::on_dataset_load));
@@ -75,16 +79,36 @@ fn main() {
     app.add_system_set(
         ConditionSet::new()
             .run_in_state(GameState::Simulating)
-            .with_system(simulation::path::best_path_update)
+            .with_system(simulation::graph::path::best_path_update)
             .into(),
+    )
+    .stage(
+        timestep::FixedUpdateLabel,
+        |stage: &mut timestep::FixedTimestepStage| {
+            stage.get_system_stage(1).add_system_set(
+                ConditionSet::new()
+                    .run_in_state(GameState::Simulating)
+                    .into(),
+            );
+            stage.get_system_stage(1).add_system_set(
+                ConditionSet::new()
+                    .run_in_state(GameState::Simulating)
+                    .with_system(simulation::control::auto_pause)
+                    .into(),
+            );
+            stage
+        },
     );
     app.add_system_set_to_stage(
         CoreStage::PostUpdate,
         ConditionSet::new()
             .run_in_state(GameState::Simulating)
-            .with_system(simulation::screen_box::simulation_box_update)
-            .with_system(simulation::city::city_transform_update)
-            .with_system(simulation::distance::distance_update)
+            .with_system(timestep::control::timestep_input_handler)
+            .with_system(simulation::control::simulation_pause_input_handler)
+            .with_system(ui::screen_box::simulation_box_update)
+            .with_system(simulation::graph::city::city_transform_update)
+            .with_system(simulation::info::distance::distance_update)
+            .with_system(simulation::info::update_count::update_count_update)
             .into(),
     );
 
@@ -95,14 +119,4 @@ fn main() {
 
     // Run
     app.run();
-}
-
-pub fn create_line(mut commands: Commands) {
-    let shape = shapes::Line(Vec2::new(50.0, 50.0), Vec2::new(100.0, 100.0));
-
-    commands.spawn_bundle(GeometryBuilder::build_as(
-        &shape,
-        DrawMode::Stroke(StrokeMode::new(Color::GRAY, 5.0)),
-        Transform::default(),
-    ));
 }

@@ -6,8 +6,8 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use crate::dataset::{Dataset, DatasetHandle};
-use crate::simulation::city::{Cities, City};
-use crate::simulation::road::{Road, Roads};
+use crate::simulation::graph::city::{Cities, City};
+use crate::simulation::graph::road::{Road, Roads};
 
 #[derive(Debug)]
 pub struct Path {

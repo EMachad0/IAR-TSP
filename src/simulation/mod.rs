@@ -1,6 +1,4 @@
-pub mod city;
+pub mod control;
 pub mod coord;
-pub mod distance;
-pub mod path;
-pub mod road;
-pub mod screen_box;
+pub mod graph;
+pub mod info;

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::dataset::Dataset;
 use crate::simulation::coord::Coord;
-use crate::simulation::screen_box::SimulationBox;
+use crate::ui::screen_box::SimulationBox;
 
 #[derive(Default, Deref, DerefMut)]
 pub struct Cities {

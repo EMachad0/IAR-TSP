@@ -1,16 +1,16 @@
 use bevy::prelude::*;
 
-use crate::simulation::city::{Cities, City};
 use crate::simulation::coord::Coord;
+use crate::simulation::graph::city::{Cities, City};
 
 #[derive(Debug, Default)]
-pub struct DistanceTracker {
+pub struct DistanceInfo {
     pub best: f32,
     pub current: f32,
 }
 
 pub fn distance_update(
-    mut tracker: ResMut<DistanceTracker>,
+    mut tracker: ResMut<DistanceInfo>,
     cities: Option<Res<Cities>>,
     query: Query<&Coord, With<City>>,
 ) {

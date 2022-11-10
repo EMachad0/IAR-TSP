@@ -12,6 +12,13 @@ pub struct SimulationBox {
 }
 
 impl SimulationBox {
+    pub fn bordered(border: f32) -> Self {
+        Self {
+            border,
+            ..default()
+        }
+    }
+
     pub fn width(&self) -> f32 {
         self.right - self.left
     }
