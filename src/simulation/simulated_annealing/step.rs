@@ -14,7 +14,6 @@ pub fn simulated_annealing_update(
     mut tracker: ResMut<DistanceInfo>,
     temperature: Res<Temperature>,
 ) {
-    debug!("Simulated Annealing Step");
     let current_distance = tracker.current;
 
     let neighbour = path.random_neighbour();
@@ -29,7 +28,6 @@ pub fn simulated_annealing_update(
         }
     } else {
         let p = (-delta / **temperature).exp();
-        debug!("p = {:.32?}", p);
         let mut rng = rand::thread_rng();
         if !p.is_nan() && rng.gen_bool(p as f64) {
             *path = neighbour;
