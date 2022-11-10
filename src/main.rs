@@ -4,8 +4,10 @@ mod dataset;
 mod diagnostics;
 mod game_state;
 mod simulation;
+mod ui;
 
 use bevy::prelude::*;
+use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use iyes_loopless::prelude::*;
@@ -24,6 +26,11 @@ fn main() {
             width: WINDOW_WIDTH,
             height: WINDOW_HEIGHT,
             ..default()
+        })
+        .init_resource::<ui::OccupiedScreenSpace>()
+        .insert_resource(simulation::screen_box::SimulationBox {
+            border: 0.1,
+            ..default()
         });
 
     // Types
@@ -37,6 +44,7 @@ fn main() {
     // Plugins
     app.add_plugins(DefaultPlugins)
         .add_plugin(ShapePlugin)
+        .add_plugin(EguiPlugin)
         .add_plugin(dataset::DatasetPlugin)
         .add_plugin(diagnostics::SimulationDiagnosticsPlugin);
 
@@ -48,6 +56,7 @@ fn main() {
     // Exit Systems
 
     // Systems
+    app.add_system(ui::ui_setup);
     // Loading
     app.add_system_set_to_stage(
         CoreStage::PreUpdate,
@@ -72,7 +81,8 @@ fn main() {
         CoreStage::PostUpdate,
         ConditionSet::new()
             .run_in_state(GameState::Simulating)
-            .with_system(simulation::scaling::transform_update_on_resize)
+            .with_system(simulation::screen_box::simulation_box_update)
+            .with_system(simulation::city::city_transform_update)
             .into(),
     );
 

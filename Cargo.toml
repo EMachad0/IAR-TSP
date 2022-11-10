@@ -9,6 +9,7 @@ edition = "2021"
 anyhow = "1.0.66"
 bevy = "0.8.1"
 bevy-inspector-egui = "0.13.0"
+bevy_egui = "0.16.1"
 bevy_prototype_lyon = "0.6.0"
 iyes_loopless = { version = "0.8.0", features = ["bevy-inspector-egui"] }
 rand = "0.8.5"

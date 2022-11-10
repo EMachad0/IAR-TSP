@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::dataset::Dataset;
-use crate::simulation::scaling::to_screen_position;
+use crate::simulation::screen_box::SimulationBox;
 
 #[derive(Default, Deref, DerefMut)]
 pub struct Cities {
@@ -31,10 +31,8 @@ pub fn city_setup_on_dataset_load(
     mut ev_asset: EventReader<AssetEvent<Dataset>>,
     assets: ResMut<Assets<Dataset>>,
     mut commands: Commands,
-    windows: Res<Windows>,
+    screen: Res<SimulationBox>,
 ) {
-    let window = windows.primary();
-
     for ev in ev_asset.iter() {
         if let AssetEvent::Created { handle } = ev {
             let dataset = assets.get(handle).unwrap();
@@ -53,8 +51,7 @@ pub fn city_setup_on_dataset_load(
 
             for (i, [x, y]) in data.iter().enumerate() {
                 let position = [(x - min_x) / (max_x - min_x), (y - min_y) / (max_y - min_y)];
-                let screen_position =
-                    to_screen_position(window.width(), window.height(), &position);
+                let screen_position = screen.translate(position);
 
                 let entity = commands
                     .spawn_bundle(SpriteBundle {
@@ -76,9 +73,17 @@ pub fn city_setup_on_dataset_load(
                 city_entities.push(entity)
             }
 
-            commands.insert_resource(Cities {
-                vec: city_entities,
-            });
+            commands.insert_resource(Cities { vec: city_entities });
         }
+    }
+}
+
+pub fn city_transform_update(
+    screen: Res<SimulationBox>,
+    mut query: Query<(&mut Transform, &City)>,
+) {
+    for (mut transform, city) in query.iter_mut() {
+        let screen_position = screen.translate((*city).into());
+        transform.translation = Vec3::from((screen_position.into(), 0.0));
     }
 }
