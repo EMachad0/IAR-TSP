@@ -14,8 +14,8 @@ use bevy_prototype_lyon::prelude::*;
 use iyes_loopless::prelude::*;
 use std::time::Duration;
 
-pub use crate::consts::*;
-pub use crate::game_state::GameState;
+use crate::consts::*;
+use crate::game_state::GameState;
 
 fn main() {
     let mut app = App::new();
@@ -91,22 +91,24 @@ fn main() {
             stage.get_system_stage(1).add_system_set(
                 ConditionSet::new()
                     .run_in_state(GameState::Simulating)
-                    .with_system(
-                        simulation::simulated_annealing::step::simulated_annealing_update
-                            .run_if_not(simulation::control::is_simulation_paused),
-                    )
+                    .run_if_not(simulation::control::is_simulation_paused)
+                    .with_system(simulation::info::update_count::update_count_update)
+                    .with_system(simulation::simulated_annealing::step::simulated_annealing_update)
                     .into(),
             );
-            stage.get_system_stage(1).add_system_set(
+            stage.get_system_stage(2).add_system_set(
                 ConditionSet::new()
                     .run_in_state(GameState::Simulating)
+                    .run_if_not(simulation::control::is_simulation_paused)
                     .with_system(
-                        simulation::simulated_annealing::temperature::temperature_update
-                            .run_if_not(simulation::control::is_simulation_paused),
+                        diagnostics::distance_diagnostic::DistanceDiagnosticsPlugin::diagnostic,
                     )
-                    .with_system(simulation::control::auto_pause)
+                    .with_system(simulation::simulated_annealing::temperature::temperature_update)
                     .into(),
             );
+            stage
+                .get_system_stage(2)
+                .add_system(simulation::control::auto_pause);
             stage
         },
     );
@@ -118,7 +120,6 @@ fn main() {
             .with_system(simulation::control::simulation_pause_input_handler)
             .with_system(ui::screen_box::simulation_box_update)
             .with_system(simulation::graph::city::city_transform_update)
-            .with_system(simulation::info::update_count::update_count_update)
             .into(),
     );
 

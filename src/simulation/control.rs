@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::consts::ITERATIONS;
 use crate::simulation::info::update_count::UpdateCountInfo;
 
 #[derive(Debug, Copy, Clone, Default)]
@@ -21,7 +22,7 @@ pub fn simulation_pause_input_handler(
 }
 
 pub fn auto_pause(mut status: ResMut<SimulationStatus>, info: Res<UpdateCountInfo>) {
-    if info.update_count % 1_000_000 == 0 {
+    if info.update_count % ITERATIONS as u64 == 0 {
         status.paused = true;
     }
 }
