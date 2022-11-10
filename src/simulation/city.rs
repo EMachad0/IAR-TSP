@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::dataset::Dataset;
+use crate::simulation::coord::Coord;
 use crate::simulation::screen_box::SimulationBox;
 
 #[derive(Default, Deref, DerefMut)]
@@ -49,7 +50,8 @@ pub fn city_setup_on_dataset_load(
 
             let mut city_entities = Vec::with_capacity(data.len());
 
-            for (i, [x, y]) in data.iter().enumerate() {
+            for (i, coord) in data.iter().enumerate() {
+                let [x, y] = coord;
                 let position = [(x - min_x) / (max_x - min_x), (y - min_y) / (max_y - min_y)];
                 let screen_position = screen.translate(position);
 
@@ -68,6 +70,7 @@ pub fn city_setup_on_dataset_load(
                     })
                     .insert(City::from(position))
                     .insert(Name::new(format!("City {}", i)))
+                    .insert(Coord::new(Vec2::from(*coord)))
                     .id();
 
                 city_entities.push(entity)

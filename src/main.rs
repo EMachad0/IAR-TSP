@@ -28,6 +28,7 @@ fn main() {
             ..default()
         })
         .init_resource::<ui::OccupiedScreenSpace>()
+        .init_resource::<simulation::distance::DistanceTracker>()
         .insert_resource(simulation::screen_box::SimulationBox {
             border: 0.1,
             ..default()
@@ -83,6 +84,7 @@ fn main() {
             .run_in_state(GameState::Simulating)
             .with_system(simulation::screen_box::simulation_box_update)
             .with_system(simulation::city::city_transform_update)
+            .with_system(simulation::distance::distance_update)
             .into(),
     );
 

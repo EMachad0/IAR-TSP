@@ -1,7 +1,7 @@
 use bevy::diagnostic::{Diagnostic, DiagnosticId, Diagnostics};
 use bevy::prelude::*;
 
-use crate::simulation::city::{Cities, City};
+use crate::simulation::distance::DistanceTracker;
 
 #[derive(Default)]
 pub struct DistanceDiagnosticsPlugin;
@@ -21,31 +21,7 @@ impl DistanceDiagnosticsPlugin {
         diagnostics.add(Diagnostic::new(Self::DISTANCE, "distance", 1));
     }
 
-    pub fn diagnostic(
-        mut diagnostics: ResMut<Diagnostics>,
-        cities: Option<Res<Cities>>,
-        query: Query<&Transform, With<City>>,
-    ) {
-        let cities = match cities {
-            None => return,
-            Some(cities) => cities,
-        };
-
-        let mut distance = 0.0;
-
-        let len = cities.len();
-        for i in 0..len {
-            let j = (i + 1) % len;
-
-            let u = query.get(cities[i]).unwrap();
-            let v = query.get(cities[j]).unwrap();
-
-            let u_pos = u.translation.truncate();
-            let v_pos = v.translation.truncate();
-
-            distance += u_pos.distance(v_pos) as f64;
-        }
-
-        diagnostics.add_measurement(Self::DISTANCE, || distance);
+    pub fn diagnostic(mut diagnostics: ResMut<Diagnostics>, tracker: Res<DistanceTracker>) {
+        diagnostics.add_measurement(Self::DISTANCE, || tracker.current as f64);
     }
 }
