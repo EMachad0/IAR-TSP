@@ -8,3 +8,6 @@ pub(crate) const DATASET_PATH: &str = "data/eil51.tsp.txt";
 
 // Simulation
 pub const STARTING_UPS: f64 = 1. / 60.;
+
+// Simulated Annealing
+pub const STARTING_TEMPERATURE: f32 = 1.0;

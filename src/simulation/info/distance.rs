@@ -2,35 +2,34 @@ use bevy::prelude::*;
 
 use crate::simulation::coord::Coord;
 use crate::simulation::graph::city::{Cities, City};
+use crate::simulation::graph::path::Path;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct DistanceInfo {
     pub best: f32,
     pub current: f32,
 }
 
-pub fn distance_update(
-    mut tracker: ResMut<DistanceInfo>,
-    cities: Option<Res<Cities>>,
-    query: Query<&Coord, With<City>>,
-) {
-    let cities = match cities {
-        None => return,
-        Some(cities) => cities,
-    };
+impl Default for DistanceInfo {
+    fn default() -> Self {
+        Self {
+            best: f32::MAX,
+            current: f32::MAX,
+        }
+    }
+}
+
+pub fn compute_distance(path: &Path, cities: &Cities, coords: &Query<&Coord, With<City>>) -> f32 {
+    let len = path.len();
 
     let mut distance = 0.0;
-
-    let len = cities.len();
     for i in 0..len {
         let j = (i + 1) % len;
 
-        let u = query.get(cities[i]).unwrap();
-        let v = query.get(cities[j]).unwrap();
+        let u = coords.get(cities[path[i]]).unwrap();
+        let v = coords.get(cities[path[j]]).unwrap();
 
         distance += u.pos.distance(v.pos)
     }
-
-    tracker.current = distance;
-    tracker.best = tracker.best.max(distance);
+    distance
 }

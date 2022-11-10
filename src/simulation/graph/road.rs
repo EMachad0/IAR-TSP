@@ -1,7 +1,10 @@
 use bevy::prelude::*;
+use bevy_prototype_lyon::entity::Path as LyonPath;
 use bevy_prototype_lyon::prelude::*;
 
 use crate::dataset::Dataset;
+use crate::simulation::graph::city::{Cities, City};
+use crate::simulation::graph::path::Path;
 
 #[derive(Default, Deref, DerefMut)]
 pub struct Roads {
@@ -39,5 +42,29 @@ pub fn road_setup_on_dataset_load(
 
             commands.insert_resource(Roads { vec: road_entities });
         }
+    }
+}
+
+pub fn road_update(
+    path: Res<Path>,
+    roads: Res<Roads>,
+    cities: Res<Cities>,
+    mut road_query: Query<&mut LyonPath, With<Road>>,
+    city_query: Query<&Transform, With<City>>,
+) {
+    let len = cities.len();
+    for i in 0..len {
+        let j = (i + 1) % len;
+
+        let u = path[i];
+        let v = path[j];
+
+        let u_pos = city_query.get(cities[u]).unwrap().translation.truncate();
+        let v_pos = city_query.get(cities[v]).unwrap().translation.truncate();
+
+        let shape = shapes::Line(u_pos, v_pos);
+
+        let mut road = road_query.get_mut(roads[i]).unwrap();
+        *road = ShapePath::build_as(&shape);
     }
 }

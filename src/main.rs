@@ -32,7 +32,10 @@ fn main() {
         .init_resource::<simulation::info::distance::DistanceInfo>()
         .init_resource::<simulation::info::update_count::UpdateCountInfo>()
         .init_resource::<simulation::control::SimulationStatus>()
-        .insert_resource(ui::screen_box::SimulationBox::bordered(0.1));
+        .insert_resource(ui::screen_box::SimulationBox::bordered(0.1))
+        .insert_resource(
+            simulation::simulated_annealing::temperature::Temperature::new(STARTING_TEMPERATURE),
+        );
 
     // Types
     app.register_type::<simulation::graph::city::City>();
@@ -79,7 +82,7 @@ fn main() {
     app.add_system_set(
         ConditionSet::new()
             .run_in_state(GameState::Simulating)
-            .with_system(simulation::graph::path::best_path_update)
+            .with_system(simulation::graph::road::road_update)
             .into(),
     )
     .stage(
@@ -88,11 +91,19 @@ fn main() {
             stage.get_system_stage(1).add_system_set(
                 ConditionSet::new()
                     .run_in_state(GameState::Simulating)
+                    .with_system(
+                        simulation::simulated_annealing::step::simulated_annealing_update
+                            .run_if_not(simulation::control::is_simulation_paused),
+                    )
                     .into(),
             );
             stage.get_system_stage(1).add_system_set(
                 ConditionSet::new()
                     .run_in_state(GameState::Simulating)
+                    .with_system(
+                        simulation::simulated_annealing::temperature::temperature_update
+                            .run_if_not(simulation::control::is_simulation_paused),
+                    )
                     .with_system(simulation::control::auto_pause)
                     .into(),
             );
@@ -107,7 +118,6 @@ fn main() {
             .with_system(simulation::control::simulation_pause_input_handler)
             .with_system(ui::screen_box::simulation_box_update)
             .with_system(simulation::graph::city::city_transform_update)
-            .with_system(simulation::info::distance::distance_update)
             .with_system(simulation::info::update_count::update_count_update)
             .into(),
     );

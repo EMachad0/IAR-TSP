@@ -13,11 +13,17 @@ pub fn side_panel_setup(
         .default_width(200.0)
         .resizable(true)
         .show(egui_ctx.ctx_mut(), |ui| {
-            ui.heading("Side Panel");
+            ui.heading("Simulation Info");
+            ui.label("Distance: ");
             ui.horizontal(|ui| {
-                ui.label("Distance: ");
+                ui.label("Current: ");
+                ui.label(format!("{:?}", distance_tracker.current))
+            });
+            ui.horizontal(|ui| {
+                ui.label("Best: ");
                 ui.label(format!("{:?}", distance_tracker.best))
             });
+            ui.separator();
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
         .response

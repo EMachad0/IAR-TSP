@@ -11,6 +11,6 @@ bevy = "0.8.1"
 bevy-inspector-egui = "0.13.0"
 bevy_egui = "0.16.1"
 bevy_prototype_lyon = "0.6.0"
-iyes_loopless = { version = "0.8.0", features = ["bevy-inspector-egui"] }
+iyes_loopless = { version = "0.8.0", features = ["app", "states", "bevy-inspector-egui"], default-features=false}
 rand = "0.8.5"
 thiserror = "1.0.37"
