@@ -13,4 +13,4 @@ pub const PLOT_ITERATIONS: usize = 1_000;
 
 // Simulated Annealing
 pub const STARTING_TEMPERATURE: f32 = 10.;
-pub const ENDING_TEMPERATURE: f32 = 1.;
+pub const ENDING_TEMPERATURE: f32 = 0.0001;

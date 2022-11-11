@@ -5,9 +5,29 @@ use rand::{thread_rng, Rng};
 
 use crate::dataset::{Dataset, DatasetHandle};
 
-#[derive(Debug, Deref, DerefMut)]
+#[derive(Debug, Clone, Deref, DerefMut)]
 pub struct Path {
     path: Vec<usize>,
+}
+
+#[derive(Debug)]
+pub struct BestPath {
+    pub path: Path,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum PathType {
+    CURRENT,
+    BEST,
+}
+
+impl std::fmt::Display for PathType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            PathType::CURRENT => write!(f, "Current"),
+            PathType::BEST => write!(f, "Best"),
+        }
+    }
 }
 
 impl Path {
@@ -33,5 +53,6 @@ pub fn path_setup_on_dataset_load(
 ) {
     let dataset = assets.get(&dataset_handle.handle).unwrap();
     let path = Path::random(dataset.len());
-    commands.insert_resource(path);
+    commands.insert_resource(path.clone());
+    commands.insert_resource(BestPath { path });
 }

@@ -3,12 +3,13 @@ use rand::Rng;
 
 use crate::simulation::coord::Coord;
 use crate::simulation::graph::city::{Cities, City};
-use crate::simulation::graph::path::Path;
+use crate::simulation::graph::path::{BestPath, Path};
 use crate::simulation::info::distance::{compute_distance, DistanceInfo};
 use crate::simulation::simulated_annealing::temperature::Temperature;
 
 pub fn simulated_annealing_update(
     mut path: ResMut<Path>,
+    mut best_path: ResMut<BestPath>,
     cities: Res<Cities>,
     coords: Query<&Coord, With<City>>,
     mut tracker: ResMut<DistanceInfo>,
@@ -21,11 +22,12 @@ pub fn simulated_annealing_update(
 
     let delta = neighbour_distance - current_distance;
     if delta < 0.0 {
-        *path = neighbour;
-        tracker.current = neighbour_distance;
         if neighbour_distance < tracker.best {
             tracker.best = neighbour_distance;
+            best_path.path = neighbour.clone();
         }
+        *path = neighbour;
+        tracker.current = neighbour_distance;
     } else {
         let p = (-delta / **temperature).exp() as f64;
         let mut rng = rand::thread_rng();

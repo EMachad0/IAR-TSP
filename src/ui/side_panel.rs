@@ -7,6 +7,8 @@ use crate::diagnostics::distance_diagnostic::DistanceDiagnosticsPlugin;
 use crate::diagnostics::temperature_diagnostic::TemperatureDiagnosticsPlugin;
 use crate::diagnostics::timestep_diagnostic::TimeStepDiagnosticsPlugin;
 use crate::simulation::control::SimulationStatus;
+use crate::simulation::graph::path::PathType;
+use crate::simulation::graph::road::RoadDisplayedPath;
 use crate::simulation::info::distance::DistanceInfo;
 use crate::simulation::info::update_count::UpdateCountInfo;
 use crate::timestep::{FixedTimestepConfig, FixedTimestepInfo};
@@ -17,6 +19,7 @@ pub fn side_panel_setup(
     mut egui_ctx: ResMut<EguiContext>,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     diagnostics: Res<Diagnostics>,
+    mut displayed_path: Option<ResMut<RoadDisplayedPath>>,
     mut status: ResMut<SimulationStatus>,
     fixed_timestep_info: Option<Res<FixedTimestepInfo>>,
     distance_info: Res<DistanceInfo>,
@@ -80,6 +83,21 @@ pub fn side_panel_setup(
                 ui.label(format!("{:.0}", update_count.update_count));
             });
             ui.checkbox(&mut status.paused, "Paused");
+            if let Some(mut displayed_path) = displayed_path {
+                ui.horizontal(|ui| {
+                    ui.label("Displayed Path: ");
+                    ui.selectable_value(
+                        &mut displayed_path.0,
+                        PathType::CURRENT,
+                        PathType::CURRENT.to_string(),
+                    );
+                    ui.selectable_value(
+                        &mut displayed_path.0,
+                        PathType::BEST,
+                        PathType::BEST.to_string(),
+                    );
+                });
+            }
             if let Some(diagnostics) = diagnostics.get(TimeStepDiagnosticsPlugin::SPS) {
                 if let Some(value) = diagnostics.value() {
                     ui.horizontal(|ui| {
