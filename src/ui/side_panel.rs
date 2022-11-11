@@ -7,6 +7,7 @@ use crate::diagnostics::distance_diagnostic::DistanceDiagnosticsPlugin;
 use crate::diagnostics::temperature_diagnostic::TemperatureDiagnosticsPlugin;
 use crate::diagnostics::timestep_diagnostic::TimeStepDiagnosticsPlugin;
 use crate::simulation::control::SimulationStatus;
+use crate::simulation::info::distance::DistanceInfo;
 use crate::simulation::info::update_count::UpdateCountInfo;
 use crate::timestep::{FixedTimestepConfig, FixedTimestepInfo};
 use crate::ui::occupied_screen_space::OccupiedScreenSpace;
@@ -18,6 +19,7 @@ pub fn side_panel_setup(
     diagnostics: Res<Diagnostics>,
     mut status: ResMut<SimulationStatus>,
     fixed_timestep_info: Option<Res<FixedTimestepInfo>>,
+    distance_info: Res<DistanceInfo>,
     update_count: Res<UpdateCountInfo>,
 ) {
     occupied_screen_space.left = egui::SidePanel::left("side_panel")
@@ -26,20 +28,17 @@ pub fn side_panel_setup(
         .show(egui_ctx.ctx_mut(), |ui| {
             ui.heading("Simulated Annealing Info");
 
+            ui.heading("Distance: ");
+            ui.horizontal(|ui| {
+                ui.label("Current: ");
+                ui.label(format!("{:.0}", distance_info.current));
+            });
+            ui.horizontal(|ui| {
+                ui.label("Best: ");
+                ui.label(format!("{:.0}", distance_info.best));
+            });
             if let Some(diagnostic) = diagnostics.get(DistanceDiagnosticsPlugin::DISTANCE) {
                 if diagnostic.history_len() != 0 {
-                    let min = diagnostic.values().map(|f| *f).reduce(f64::min).unwrap();
-
-                    ui.heading("Distance: ");
-                    ui.horizontal(|ui| {
-                        ui.label("Current: ");
-                        ui.label(format!("{:.0}", diagnostic.value().unwrap()));
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label("Best: ");
-                        ui.label(format!("{:.0}", min));
-                    });
-
                     let over_time: PlotPoints = diagnostic
                         .values()
                         .enumerate()
@@ -49,10 +48,9 @@ pub fn side_panel_setup(
                     Plot::new("distance_plot")
                         .view_aspect(2.0)
                         .show(ui, |plot_ui| plot_ui.line(Line::new(over_time)));
-
-                    ui.separator();
                 }
             }
+            ui.separator();
             if let Some(diagnostic) = diagnostics.get(TemperatureDiagnosticsPlugin::TEMPERATURE) {
                 if diagnostic.history_len() != 0 {
                     ui.heading("Temperature:");

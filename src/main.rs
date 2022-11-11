@@ -112,10 +112,11 @@ fn main() {
                     .with_system(simulation::simulated_annealing::temperature::temperature_update)
                     .into(),
             );
-            stage
-                .get_system_stage(2)
-                .add_system(simulation::control::auto_pause)
-                .add_system(simulation::simulated_annealing::temperature::pause_on_low_temp);
+            stage.get_system_stage(2).add_system_set(
+                ConditionSet::new()
+                    .run_in_state(GameState::Simulating)
+                    .with_system(simulation::control::auto_pause)
+                    .into());
             stage
         },
     );

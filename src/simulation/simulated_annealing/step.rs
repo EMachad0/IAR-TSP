@@ -27,9 +27,9 @@ pub fn simulated_annealing_update(
             tracker.best = neighbour_distance;
         }
     } else {
-        let p = (-delta / **temperature).exp();
+        let p = (-delta / **temperature).exp() as f64;
         let mut rng = rand::thread_rng();
-        if !p.is_nan() && rng.gen_bool(p as f64) {
+        if rng.gen_bool(p) {
             *path = neighbour;
             tracker.current = neighbour_distance;
         }

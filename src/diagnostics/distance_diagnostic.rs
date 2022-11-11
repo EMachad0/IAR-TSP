@@ -1,7 +1,7 @@
 use bevy::diagnostic::{Diagnostic, DiagnosticId, Diagnostics};
 use bevy::prelude::*;
 
-use crate::consts::ITERATIONS;
+use crate::consts::PLOT_ITERATIONS;
 use crate::simulation::info::distance::DistanceInfo;
 
 #[derive(Default)]
@@ -18,7 +18,7 @@ impl DistanceDiagnosticsPlugin {
         DiagnosticId::from_u128(329646547152197190680648809532654742098);
 
     pub fn setup(mut diagnostics: ResMut<Diagnostics>) {
-        diagnostics.add(Diagnostic::new(Self::DISTANCE, "distance", ITERATIONS));
+        diagnostics.add(Diagnostic::new(Self::DISTANCE, "distance", PLOT_ITERATIONS));
     }
 
     pub fn diagnostic(mut diagnostics: ResMut<Diagnostics>, tracker: Res<DistanceInfo>) {

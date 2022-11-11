@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::consts::MIN_TEMP;
-use crate::simulation::control::SimulationStatus;
+use crate::consts::{ENDING_TEMPERATURE, ITERATIONS, STARTING_TEMPERATURE};
+use crate::simulation::info::update_count::UpdateCountInfo;
 
 #[derive(Debug, Deref, DerefMut)]
 pub struct Temperature {
@@ -14,12 +14,13 @@ impl Temperature {
     }
 }
 
-pub fn temperature_update(mut temperature: ResMut<Temperature>) {
-    temperature.temp /= 2.0;
-}
-
-pub fn pause_on_low_temp(mut status: ResMut<SimulationStatus>, info: Res<Temperature>) {
-    if info.temp < MIN_TEMP {
-        status.paused = true;
-    }
+pub fn temperature_update(
+    mut temperature: ResMut<Temperature>,
+    update_count: Res<UpdateCountInfo>,
+) {
+    let i = update_count.update_count as f32;
+    let temp =
+        STARTING_TEMPERATURE - i * (STARTING_TEMPERATURE - ENDING_TEMPERATURE) / ITERATIONS as f32;
+    let temp = temp.max(ENDING_TEMPERATURE);
+    temperature.temp = temp;
 }
