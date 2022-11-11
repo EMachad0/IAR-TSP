@@ -103,12 +103,19 @@ fn main() {
                     .with_system(
                         diagnostics::distance_diagnostic::DistanceDiagnosticsPlugin::diagnostic,
                     )
+                    .with_system(
+                        diagnostics::timestep_diagnostic::TimeStepDiagnosticsPlugin::diagnostic,
+                    )
+                    .with_system(
+                        diagnostics::temperature_diagnostic::TemperatureDiagnosticsPlugin::diagnostic,
+                    )
                     .with_system(simulation::simulated_annealing::temperature::temperature_update)
                     .into(),
             );
             stage
                 .get_system_stage(2)
-                .add_system(simulation::control::auto_pause);
+                .add_system(simulation::control::auto_pause)
+                .add_system(simulation::simulated_annealing::temperature::pause_on_low_temp);
             stage
         },
     );
