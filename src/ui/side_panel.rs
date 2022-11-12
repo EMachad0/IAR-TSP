@@ -17,6 +17,7 @@ use crate::simulation::info::update_count::UpdateCountInfo;
 use crate::simulation::reset::ResetControl;
 use crate::timestep::{FixedTimestepConfig, FixedTimestepInfo};
 use crate::ui::occupied_screen_space::OccupiedScreenSpace;
+use crate::ui::plot::draw_line;
 
 pub fn side_panel_setup(
     mut commands: Commands,
@@ -48,6 +49,9 @@ pub fn side_panel_setup(
             if let Some(diagnostic) = diagnostics.get(DistanceDiagnosticsPlugin::DISTANCE) {
                 if diagnostic.history_len() != 0 {
                     plot(ui, diagnostic.values(), "distance_plot");
+                    if ui.button("Save Plot").clicked() {
+                        draw_line("Distance", &diagnostic.values().cloned().collect());
+                    }
                 }
             }
             ui.separator();
@@ -59,6 +63,9 @@ pub fn side_panel_setup(
                         ui.label(format!("{:.6}", diagnostic.value().unwrap()));
                     });
                     plot(ui, diagnostic.values(), "temperature_plot");
+                    if ui.button("Save Plot").clicked() {
+                        draw_line("Temperature", &diagnostic.values().cloned().collect());
+                    }
                     ui.separator();
                 }
             }

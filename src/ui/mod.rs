@@ -1,4 +1,5 @@
 mod occupied_screen_space;
+pub mod plot;
 pub mod screen_box;
 mod side_panel;
 
