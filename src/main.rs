@@ -32,6 +32,7 @@ fn main() {
         .init_resource::<simulation::info::distance::DistanceInfo>()
         .init_resource::<simulation::info::update_count::UpdateCountInfo>()
         .init_resource::<simulation::control::SimulationStatus>()
+        .init_resource::<simulation::reset::ResetControl>()
         .insert_resource(ui::screen_box::SimulationBox::bordered(0.1))
         .insert_resource(
             simulation::simulated_annealing::temperature::Temperature::new(STARTING_TEMPERATURE),
@@ -128,6 +129,9 @@ fn main() {
             .with_system(simulation::control::simulation_pause_input_handler)
             .with_system(ui::screen_box::simulation_box_update)
             .with_system(simulation::graph::city::city_transform_update)
+            .with_system(
+                simulation::reset::simulation_reset.run_if(simulation::reset::is_waiting_reset),
+            )
             .into(),
     );
 

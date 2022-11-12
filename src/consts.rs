@@ -9,7 +9,7 @@ pub(crate) const DATASET_PATH: &str = "data/eil51.tsp.txt";
 // Simulation
 pub const STARTING_UPS: f64 = 1. / 1000.;
 pub const ITERATIONS: usize = 1_000_000;
-pub const PLOT_ITERATIONS: usize = 1_000;
+pub const MAX_PLOT_POINTS: usize = 500;
 
 // Simulated Annealing
 pub const STARTING_TEMPERATURE: f32 = 10.;

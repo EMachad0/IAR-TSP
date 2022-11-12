@@ -1,7 +1,7 @@
 use bevy::diagnostic::{Diagnostic, DiagnosticId, Diagnostics};
 use bevy::prelude::*;
 
-use crate::consts::PLOT_ITERATIONS;
+use crate::consts::ITERATIONS;
 use crate::simulation::simulated_annealing::temperature::Temperature;
 
 #[derive(Default)]
@@ -18,7 +18,7 @@ impl TemperatureDiagnosticsPlugin {
         DiagnosticId::from_u128(73815967321894632935461374174954372577);
 
     pub fn setup(mut diagnostics: ResMut<Diagnostics>) {
-        diagnostics.add(Diagnostic::new(Self::TEMPERATURE, "distance", PLOT_ITERATIONS));
+        diagnostics.add(Diagnostic::new(Self::TEMPERATURE, "distance", ITERATIONS));
     }
 
     pub fn diagnostic(mut diagnostics: ResMut<Diagnostics>, tracker: Res<Temperature>) {

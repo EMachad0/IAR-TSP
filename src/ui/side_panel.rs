@@ -1,8 +1,11 @@
 use bevy::diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy_egui::egui::plot::{Line, Plot, PlotPoints};
+use bevy_egui::egui::Ui;
 use bevy_egui::{egui, EguiContext};
+use std::hash::Hash;
 
+use crate::consts::MAX_PLOT_POINTS;
 use crate::diagnostics::distance_diagnostic::DistanceDiagnosticsPlugin;
 use crate::diagnostics::temperature_diagnostic::TemperatureDiagnosticsPlugin;
 use crate::diagnostics::timestep_diagnostic::TimeStepDiagnosticsPlugin;
@@ -11,6 +14,7 @@ use crate::simulation::graph::path::PathType;
 use crate::simulation::graph::road::RoadDisplayedPath;
 use crate::simulation::info::distance::DistanceInfo;
 use crate::simulation::info::update_count::UpdateCountInfo;
+use crate::simulation::reset::ResetControl;
 use crate::timestep::{FixedTimestepConfig, FixedTimestepInfo};
 use crate::ui::occupied_screen_space::OccupiedScreenSpace;
 
@@ -19,8 +23,9 @@ pub fn side_panel_setup(
     mut egui_ctx: ResMut<EguiContext>,
     mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
     diagnostics: Res<Diagnostics>,
-    mut displayed_path: Option<ResMut<RoadDisplayedPath>>,
+    displayed_path: Option<ResMut<RoadDisplayedPath>>,
     mut status: ResMut<SimulationStatus>,
+    mut reset_control: ResMut<ResetControl>,
     fixed_timestep_info: Option<Res<FixedTimestepInfo>>,
     distance_info: Res<DistanceInfo>,
     update_count: Res<UpdateCountInfo>,
@@ -42,15 +47,7 @@ pub fn side_panel_setup(
             });
             if let Some(diagnostic) = diagnostics.get(DistanceDiagnosticsPlugin::DISTANCE) {
                 if diagnostic.history_len() != 0 {
-                    let over_time: PlotPoints = diagnostic
-                        .values()
-                        .enumerate()
-                        .map(|(i, v)| [i as f64, *v])
-                        .collect();
-
-                    Plot::new("distance_plot")
-                        .view_aspect(2.0)
-                        .show(ui, |plot_ui| plot_ui.line(Line::new(over_time)));
+                    plot(ui, diagnostic.values(), "distance_plot");
                 }
             }
             ui.separator();
@@ -61,17 +58,7 @@ pub fn side_panel_setup(
                         ui.label("Current: ");
                         ui.label(format!("{:.6}", diagnostic.value().unwrap()));
                     });
-
-                    let over_time: PlotPoints = diagnostic
-                        .values()
-                        .enumerate()
-                        .map(|(i, v)| [i as f64, *v])
-                        .collect();
-
-                    Plot::new("temperature_plot")
-                        .view_aspect(2.0)
-                        .show(ui, |plot_ui| plot_ui.line(Line::new(over_time)));
-
+                    plot(ui, diagnostic.values(), "temperature_plot");
                     ui.separator();
                 }
             }
@@ -128,10 +115,32 @@ pub fn side_panel_setup(
                     });
                 }
             }
+            if ui.button("Reset").clicked() {
+                reset_control.waiting_reset = true;
+            }
 
             ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         })
         .response
         .rect
         .width();
+}
+
+pub fn plot<'a, I, H>(ui: &mut Ui, itr: I, id: H)
+where
+    I: IntoIterator<Item = &'a f64>,
+    H: Hash,
+{
+    let points = itr.into_iter().enumerate().collect::<Vec<_>>();
+    let chunk_size = (points.len() / MAX_PLOT_POINTS).max(1);
+
+    let over_time: PlotPoints = points
+        .chunks(chunk_size)
+        .map(|c| *c.last().unwrap())
+        .map(|(i, v)| [i as f64, *v])
+        .collect();
+
+    Plot::new(id)
+        .view_aspect(2.0)
+        .show(ui, |plot_ui| plot_ui.line(Line::new(over_time)));
 }
