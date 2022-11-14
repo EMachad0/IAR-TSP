@@ -14,3 +14,4 @@ pub const MAX_PLOT_POINTS: usize = 500;
 // Simulated Annealing
 pub const STARTING_TEMPERATURE: f32 = 10.;
 pub const ENDING_TEMPERATURE: f32 = 0.0001;
+pub const SAMAX: u32 = 10;

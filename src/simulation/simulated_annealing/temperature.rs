@@ -18,9 +18,17 @@ pub fn temperature_update(
     mut temperature: ResMut<Temperature>,
     update_count: Res<UpdateCountInfo>,
 ) {
+    let n = ITERATIONS as f32;
     let i = update_count.update_count as f32;
-    let temp =
-        STARTING_TEMPERATURE - i * (STARTING_TEMPERATURE - ENDING_TEMPERATURE) / ITERATIONS as f32;
+    let t0 = STARTING_TEMPERATURE;
+    let tn = ENDING_TEMPERATURE;
+
+    // let a = ((t0 - tn) * (n + 1.0)) / n;
+    // let b = t0 - a;
+    // let temp = (a / (i + 1.0)) + b;
+
+    let temp = t0 - i * (t0 - tn) / n;
+
     let temp = temp.max(ENDING_TEMPERATURE);
     temperature.temp = temp;
 }
