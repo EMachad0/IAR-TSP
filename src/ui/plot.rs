@@ -1,5 +1,6 @@
 use plotters::prelude::*;
 
+#[allow(unused_imports)]
 use crate::consts::MAX_PLOT_POINTS;
 
 pub fn draw_line(title: &str, data: &Vec<f64>) {
@@ -9,7 +10,7 @@ pub fn draw_line(title: &str, data: &Vec<f64>) {
     //     .map(|c| *c.last().unwrap())
     //     .collect();
 
-    let min_element = data.iter().cloned().reduce(f64::min).unwrap();
+    // let min_element = data.iter().cloned().reduce(f64::min).unwrap();
     let max_element = data.iter().cloned().reduce(f64::max).unwrap();
 
     let path = format!("assets/img/{}.png", title.replace(' ', "_")).to_ascii_lowercase();
@@ -23,7 +24,7 @@ pub fn draw_line(title: &str, data: &Vec<f64>) {
         .caption(title, ("Arial", 30))
         .set_label_area_size(LabelAreaPosition::Left, 50)
         .set_label_area_size(LabelAreaPosition::Bottom, 50)
-        .build_cartesian_2d(0..data.len(), min_element..max_element)
+        .build_cartesian_2d(0..data.len(), 0.0..max_element)
         .unwrap();
 
     // Axis
