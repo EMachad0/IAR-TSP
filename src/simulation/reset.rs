@@ -32,6 +32,7 @@ pub fn simulation_reset(
 ) {
     *path = Path::random(cities.len());
     distance.current = compute_distance(&path, &cities, &coords);
+    distance.best = distance.current;
     temp.temp = STARTING_TEMPERATURE;
     info.update_count = 0;
     if let Some(diagnostic) = diagnostics.get_mut(TemperatureDiagnosticsPlugin::TEMPERATURE) {
